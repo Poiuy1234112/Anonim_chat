@@ -6,8 +6,8 @@ from aiogram.types import FSInputFile
 
 
 # Получаем значения из файла
-API_TOKEN = '8097407050:AAG5_bjLFZD059hy5kDE30DFiE3S995JqnI'
-GROUP_CHAT_ID = -1002325271770
+API_TOKEN = ''
+GROUP_CHAT_ID = 
 
 logging.basicConfig(level=logging.INFO)
 
