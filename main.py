@@ -6,7 +6,7 @@ from aiogram.types import FSInputFile
 
 
 # Получаем значения из файла
-API_TOKEN = ''
+API_TOKEN = '' #язабыл удалить и всё теперь удалил
 GROUP_CHAT_ID = 
 
 logging.basicConfig(level=logging.INFO)
