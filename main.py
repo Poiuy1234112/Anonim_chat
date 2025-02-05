@@ -4,8 +4,12 @@ import asyncio
 from aiogram import Bot, Dispatcher, types, Router, F
 from aiogram.filters import Command
 from aiogram.types import FSInputFile
-from config import API_TOKEN, GROUP_CHAT_ID  # Импортируем конфигурационные данные
+#from config import API_TOKEN, GROUP_CHAT_ID  # Импортируем конфигурационные данные
+import os
 
+# изменено полусаение токенов итд 
+API_TOKEN = os.getenv("API_TOKEN")  # Токен бота
+GROUP_CHAT_ID = os.getenv("GROUP_CHAT_ID")  # ID группы
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
@@ -57,7 +61,7 @@ async def send_help(message: types.Message):
                 "/end - Завершить анонимный чат\n"
                 "/help - Получить справку\n\n"
                 "ПРИМЕЧАНИЕ: после окончания диалога советую ЗАКРЫВАТЬ чат а когда надо открывать новый для большей анонимности\n"
-                "версия бота 1.37 ура хостиг! И был добален прокси сервер для безопастности \n"
+                "версия бота 1.38 ура хостиг! \n"
                 "добавлен гитхаб  при любых проблемах или если вы хотите лично кзнать как рбаотет бот пришите @Andre_Niks"
     )
 
