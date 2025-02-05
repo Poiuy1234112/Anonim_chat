@@ -6,6 +6,17 @@ from aiogram import Bot, Dispatcher, types, Router, F
 from aiogram.filters import Command
 from aiogram.types import FSInputFile
 
+const express = require('express')
+const app = express()
+const port = process.env.PORT || 4000;
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
+
 # Получаем токен и ID группы из переменных окружения
 API_TOKEN = os.getenv("API_TOKEN")  # Токен бота
 GROUP_CHAT_ID = os.getenv("GROUP_CHAT_ID")  # ID группы
@@ -65,7 +76,7 @@ async def send_help(message: types.Message):
                 "/end - Завершить анонимный чат\n"
                 "/help - Получить справку\n\n"
                 "ПРИМЕЧАНИЕ: после окончания диалога советую ЗАКРЫВАТЬ чат а когда надо открывать новый для большей анонимности\n"
-                "версия бота 1.37 ура хостиг! И был добален прокси сервер для безопастности \n"
+                "версия бота 1.38b ура хостиг! И был добален прокси сервер для безопастности \n"
                 "добавлен гитхаб  при любых проблемах или если вы хотите лично кзнать как рбаотет бот пришите @Andre_Niks"
     )
 
