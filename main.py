@@ -1,15 +1,14 @@
 # main.py
 import logging
 import asyncio
-import os  # Импортируем модуль os для работы с переменными окружения
+import os
 from aiogram import Bot, Dispatcher, types, Router, F
 from aiogram.filters import Command
 from aiogram.types import FSInputFile
 
-
 # Получаем токен и ID группы из переменных окружения
 API_TOKEN = os.getenv("API_TOKEN")  # Токен бота
-GROUP_CHAT_ID = os.getenv("GROUP_CHAT_ID")  # ID группы
+GROUP_CHAT_ID = int(os.getenv("GROUP_CHAT_ID"))  # ID группы (преобразуем в int)
 
 # Проверяем, что переменные окружения заданы
 if not API_TOKEN or not GROUP_CHAT_ID:
@@ -17,6 +16,7 @@ if not API_TOKEN or not GROUP_CHAT_ID:
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Инициализация бота и диспетчера
 bot = Bot(token=API_TOKEN)
@@ -66,7 +66,7 @@ async def send_help(message: types.Message):
                 "/end - Завершить анонимный чат\n"
                 "/help - Получить справку\n\n"
                 "ПРИМЕЧАНИЕ: после окончания диалога советую ЗАКРЫВАТЬ чат а когда надо открывать новый для большей анонимности\n"
-                "версия бота 1.38b ура хостиг! И был добален прокси сервер для безопастности \n"
+                "версия бота 1.38d ура хостиг! И был добален прокси сервер для безопастности \n"
                 "добавлен гитхаб  при любых проблемах или если вы хотите лично кзнать как рбаотет бот пришите @Andre_Niks"
     )
 
@@ -92,7 +92,7 @@ async def begin_chat(message: types.Message):
         )
 
     except Exception as e:
-        logging.error(f"Ошибка создания топика: {e}")
+        logger.error(f"Ошибка создания топика: {e}")
         await message.reply("⚠️ Не удалось создать чат. Попробуй позже")
 
 @router.message(Command('end'))
@@ -111,7 +111,7 @@ async def end_chat(message: types.Message):
         await message.reply("✅ Чат успешно завершен")
 
     except Exception as e:
-        logging.error(f"Ошибка закрытия топика: {e}")
+        logger.error(f"Ошибка закрытия топика: {e}")
         await message.reply("⚠️ Не удалось завершить чат. Обратись к администратору @Andre_Niks")
 
 @router.message(F.chat.id > 0)  # Личные сообщения
@@ -174,12 +174,16 @@ async def handle_user_message(message: types.Message):
 
 @router.message(F.chat.id == GROUP_CHAT_ID)  # Сообщения из группы
 async def handle_group_message(message: types.Message):
+    logger.info(f"Получено сообщение из группы: {message}")
+
     if not message.message_thread_id:
+        logger.warning("Сообщение не из топика, игнорируем.")
         return
 
     topic_id = message.message_thread_id
 
     if topic_id not in topic_to_user:
+        logger.warning(f"Топик {topic_id} не найден в topic_to_user.")
         return
 
     user_id = topic_to_user[topic_id]
