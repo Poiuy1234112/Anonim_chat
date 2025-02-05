@@ -6,9 +6,6 @@ from aiogram import Bot, Dispatcher, types, Router, F
 from aiogram.filters import Command
 from aiogram.types import FSInputFile
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
 
 # Получаем токен и ID группы из переменных окружения
 API_TOKEN = os.getenv("API_TOKEN")  # Токен бота
