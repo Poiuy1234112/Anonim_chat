@@ -1,16 +1,15 @@
+# main.py
 import logging
 import asyncio
-from aiogram import Bot, Dispatcher, types, Router, F  # Добавлен импорт F
+from aiogram import Bot, Dispatcher, types, Router, F
 from aiogram.filters import Command
 from aiogram.types import FSInputFile
+from config import API_TOKEN, GROUP_CHAT_ID  # Импортируем конфигурационные данные
 
-
-# Получаем значения из файла
-API_TOKEN = '' #язабыл удалить и всё теперь удалил
-GROUP_CHAT_ID = 
-
+# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
+# Инициализация бота и диспетчера
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 router = Router()
@@ -19,6 +18,7 @@ router = Router()
 user_to_topic = {}
 topic_to_user = {}
 
+# Функции для работы с топиками
 async def create_topic(user_id: int) -> int:
     """Создает топик в группе-форуме и возвращает его ID"""
     topic = await bot.create_forum_topic(
@@ -34,19 +34,21 @@ async def close_topic(topic_id: int):
         message_thread_id=topic_id
     )
 
+# Обработчики команд
 @router.message(Command('start'))
 async def send_welcome(message: types.Message):
-    # Указываем путь к картинке
-    photo = FSInputFile("start_image.png")  # Убедитесь, что файл start_image.png лежит в той же папке, что и скрипт
+    photo = FSInputFile("start_image.png")
     await message.answer_photo(
         photo,
-        caption="Привет Я бот для анонимного общения с Андрем\n и данный юот предназначен для обсуждения личных проблем со мной макчимально анонимно :)\n (настольок что у мення открытый код) \n чтобы понять как пользаватся ботом пишите /help \n\n и если что меня вообше не волнует на каие темы вы будете со мной обшатся всегда готов потдержать ^^"
+        caption="Привет Я бот для анонимного общения с Андрем\n" 
+        "и данный юот предназначен для обсуждения личных проблем со мной макчимально анонимно :)\n (настольок что у мення открытый код) \n" 
+        "чтобы понять как пользаватся ботом пишите /help \n\n" 
+        "и если что меня вообше не волнует на каие темы вы будете со мной обшатся всегда готов потдержать ^^"
     )
 
 @router.message(Command('help'))
 async def send_help(message: types.Message):
-    # Указываем путь к картинке
-    photo = FSInputFile("help_image.png")  # Убедитесь, что файл help_image.png лежит в той же папке, что и скрипт
+    photo = FSInputFile("help_image.png")
     await message.answer_photo(
         photo,
         caption=" Команды-помошь:\n"
@@ -68,16 +70,12 @@ async def begin_chat(message: types.Message):
         return
 
     try:
-        # Создаем новый топик
         topic_id = await create_topic(user_id)
-        
-        # Сохраняем связь
         user_to_topic[user_id] = topic_id
         topic_to_user[topic_id] = user_id
         
         await message.reply(f"Чат создан! Ты можешь начинать писать сообщения :)  Если я не отвечаю пингани @Andre_Niks")
         
-        # Отправляем приветствие в топик
         await bot.send_message(
             chat_id=GROUP_CHAT_ID,
             message_thread_id=topic_id,
@@ -87,7 +85,6 @@ async def begin_chat(message: types.Message):
     except Exception as e:
         logging.error(f"Ошибка создания топика: {e}")
         await message.reply("⚠️ Не удалось создать чат. Попробуй позже")
-        photo = FSInputFile("start_image.png") 
 
 @router.message(Command('end'))
 async def end_chat(message: types.Message):
@@ -99,20 +96,14 @@ async def end_chat(message: types.Message):
 
     try:
         topic_id = user_to_topic[user_id]
-        
-        # Закрываем топик
         await close_topic(topic_id)
-        
-        # Удаляем из хранилища
         del user_to_topic[user_id]
         del topic_to_user[topic_id]
-        
         await message.reply("✅ Чат успешно завершен")
         
     except Exception as e:
         logging.error(f"Ошибка закрытия топика: {e}")
         await message.reply("⚠️ Не удалось завершить чат. Обратись к администратору @Andre_Niks")
-        photo = FSInputFile("start_image.png") 
 
 @router.message(F.chat.id > 0)  # Личные сообщения
 async def handle_user_message(message: types.Message):
@@ -120,28 +111,22 @@ async def handle_user_message(message: types.Message):
     
     if user_id not in user_to_topic:
         await message.reply("❌ Сначала начни чат командой /begin")
-        photo = FSInputFile("start_image.png") 
         return
 
     topic_id = user_to_topic[user_id]
     
-    # Обработка текстовых сообщений
     if message.text:
         await bot.send_message(
             chat_id=GROUP_CHAT_ID,
             message_thread_id=topic_id,
             text=f"Сообщение от пользователя:\n{message.text}"
         )
-    
-    # Обработка стикеров
     elif message.sticker:
         await bot.send_sticker(
             chat_id=GROUP_CHAT_ID,
             message_thread_id=topic_id,
             sticker=message.sticker.file_id
         )
-    
-    # Обработка фото
     elif message.photo:
         await bot.send_photo(
             chat_id=GROUP_CHAT_ID,
@@ -149,8 +134,6 @@ async def handle_user_message(message: types.Message):
             photo=message.photo[-1].file_id,
             caption="Фото от пользователя"
         )
-    
-    # Обработка GIF (анимации)
     elif message.animation:
         await bot.send_animation(
             chat_id=GROUP_CHAT_ID,
@@ -158,8 +141,6 @@ async def handle_user_message(message: types.Message):
             animation=message.animation.file_id,
             caption="GIF от пользователя"
         )
-    
-    # Обработка документов
     elif message.document:
         await bot.send_document(
             chat_id=GROUP_CHAT_ID,
@@ -167,8 +148,6 @@ async def handle_user_message(message: types.Message):
             document=message.document.file_id,
             caption="Документ от пользователя"
         )
-    
-    # Обработка голосовых сообщений
     elif message.voice:
         await bot.send_voice(
             chat_id=GROUP_CHAT_ID,
@@ -176,8 +155,6 @@ async def handle_user_message(message: types.Message):
             voice=message.voice.file_id,
             caption="Голосовое сообщение от пользователя"
         )
-    
-    # Обработка видео
     elif message.video:
         await bot.send_video(
             chat_id=GROUP_CHAT_ID,
@@ -188,7 +165,6 @@ async def handle_user_message(message: types.Message):
 
 @router.message(F.chat.id == GROUP_CHAT_ID)  # Сообщения из группы
 async def handle_group_message(message: types.Message):
-    # Проверяем, что сообщение из топика
     if not message.message_thread_id:
         return
     
@@ -199,7 +175,6 @@ async def handle_group_message(message: types.Message):
 
     user_id = topic_to_user[topic_id]
     
-    # Пересылаем ответ пользователю
     if message.text:
         await bot.send_message(
             chat_id=user_id,
@@ -238,9 +213,10 @@ async def handle_group_message(message: types.Message):
         await bot.send_video(
             chat_id=user_id,
             video=message.video.file_id,
-              caption="Андрей:"
+            caption="Андрей:"
         )
 
+# Запуск бота
 async def main():
     dp.include_router(router)
     await dp.start_polling(bot)
