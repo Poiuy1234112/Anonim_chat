@@ -40,9 +40,9 @@ async def send_welcome(message: types.Message):
     photo = FSInputFile("start_image.png")
     await message.answer_photo(
         photo,
-        caption="Привет Я бот для анонимного общения с Андрем\n" 
-        "и данный юот предназначен для обсуждения личных проблем со мной макчимально анонимно :)\n (настольок что у мення открытый код) \n" 
-        "чтобы понять как пользаватся ботом пишите /help \n\n" 
+        caption="Привет Я бот для анонимного общения с Андрем\n"
+        "и данный юот предназначен для обсуждения личных проблем со мной макчимально анонимно :)\n (настольок что у мення открытый код) \n"
+        "чтобы понять как пользаватся ботом пишите /help \n\n"
         "и если что меня вообше не волнует на каие темы вы будете со мной обшатся всегда готов потдержать ^^"
     )
 
@@ -57,14 +57,14 @@ async def send_help(message: types.Message):
                 "/end - Завершить анонимный чат\n"
                 "/help - Получить справку\n\n"
                 "ПРИМЕЧАНИЕ: после окончания диалога советую ЗАКРЫВАТЬ чат а когда надо открывать новый для большей анонимности\n"
-                "версия бота 1.24 код более структуриованый и безопастный \n"
+                "версия бота 1.37 ура хостиг! И был добален прокси сервер для безопастности \n"
                 "добавлен гитхаб  при любых проблемах или если вы хотите лично кзнать как рбаотет бот пришите @Andre_Niks"
     )
 
 @router.message(Command('begin'))
 async def begin_chat(message: types.Message):
     user_id = message.from_user.id
-    
+
     if user_id in user_to_topic:
         await message.reply("❌ У тебя уже есть активный чат. Нажми /end чтобы завершить его")
         return
@@ -73,15 +73,15 @@ async def begin_chat(message: types.Message):
         topic_id = await create_topic(user_id)
         user_to_topic[user_id] = topic_id
         topic_to_user[topic_id] = user_id
-        
+
         await message.reply(f"Чат создан! Ты можешь начинать писать сообщения :)  Если я не отвечаю пингани @Andre_Niks")
-        
+
         await bot.send_message(
             chat_id=GROUP_CHAT_ID,
             message_thread_id=topic_id,
             text=f"Новый анонимный запрос от пользователя #За_работу @Andre_Niks"
         )
-        
+
     except Exception as e:
         logging.error(f"Ошибка создания топика: {e}")
         await message.reply("⚠️ Не удалось создать чат. Попробуй позже")
@@ -89,7 +89,7 @@ async def begin_chat(message: types.Message):
 @router.message(Command('end'))
 async def end_chat(message: types.Message):
     user_id = message.from_user.id
-    
+
     if user_id not in user_to_topic:
         await message.reply("❌ У тебя нет активных чатов")
         return
@@ -100,7 +100,7 @@ async def end_chat(message: types.Message):
         del user_to_topic[user_id]
         del topic_to_user[topic_id]
         await message.reply("✅ Чат успешно завершен")
-        
+
     except Exception as e:
         logging.error(f"Ошибка закрытия топика: {e}")
         await message.reply("⚠️ Не удалось завершить чат. Обратись к администратору @Andre_Niks")
@@ -108,13 +108,13 @@ async def end_chat(message: types.Message):
 @router.message(F.chat.id > 0)  # Личные сообщения
 async def handle_user_message(message: types.Message):
     user_id = message.from_user.id
-    
+
     if user_id not in user_to_topic:
         await message.reply("❌ Сначала начни чат командой /begin")
         return
 
     topic_id = user_to_topic[user_id]
-    
+
     if message.text:
         await bot.send_message(
             chat_id=GROUP_CHAT_ID,
@@ -167,14 +167,14 @@ async def handle_user_message(message: types.Message):
 async def handle_group_message(message: types.Message):
     if not message.message_thread_id:
         return
-    
+
     topic_id = message.message_thread_id
-    
+
     if topic_id not in topic_to_user:
         return
 
     user_id = topic_to_user[topic_id]
-    
+
     if message.text:
         await bot.send_message(
             chat_id=user_id,
