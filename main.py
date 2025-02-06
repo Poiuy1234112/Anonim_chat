@@ -64,7 +64,10 @@ async def stop_command(message: types.Message):
         await message.reply("❌ Необходимо предоставить секретный код. Использование: /stop <код>")
         return
     
-    user_code = args[1]
+    user_code = args[1].strip()  # Убираем лишние пробелы
+    logger.info(f"Получен код от пользователя: '{user_code}'")  # Логируем введенный код
+    logger.info(f"Ожидаемый код: '{STOP_CODE}'")  # Логируем ожидаемый код
+
     if user_code != STOP_CODE:
         await message.reply("❌ Неверный секретный код.")
         return
@@ -75,7 +78,7 @@ async def stop_command(message: types.Message):
     # Останавливаем поллинг и закрываем соединения
     await dp.stop_polling()
     await bot.session.close()
-
+    
 @router.message(Command('start'))
 async def send_welcome(message: types.Message):
     photo = FSInputFile("start_image.png")
